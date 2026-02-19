@@ -196,6 +196,28 @@ def show_air_quality(city_name):
             console.print(f"[bold red]Error fetching air quality:[/bold red] {e}")
 
 def main():
+    console.print("\n[bold magenta]🌦️  Weather CLI Tool v2.0  🍃[/bold magenta]")
+
+    # Check for interactive mode (no arguments)
+    if len(sys.argv) == 1:
+        console.print("[yellow]No command specified. Entering interactive mode...[/yellow]")
+        city = Prompt.ask("[bold cyan]Enter city name[/bold cyan]")
+        mode = Prompt.ask("[bold cyan]Choose mode[/bold cyan]", choices=["weather", "air"], default="weather")
+        # Direct call
+        if mode == "weather":
+            show_weather(city)
+        else:
+            show_air_quality(city)
+        return
+
+    # Check for "backward compatibility" mode (no subcommand)
+    # If the first argument isn't a known command, assume it's a city for 'weather'
+    if len(sys.argv) > 1 and sys.argv[1] not in ["weather", "air", "-h", "--help"]:
+        city_name = " ".join(sys.argv[1:])
+        show_weather(city_name)
+        return
+
+    # Standard Argument Parsing
     parser = argparse.ArgumentParser(description="Multi-functional Weather CLI Tool")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
@@ -207,31 +229,12 @@ def main():
     air_parser = subparsers.add_parser("air", help="Get air quality data")
     air_parser.add_argument("city", nargs="+", help="Name of the city")
 
-    # Parse arguments
     args = parser.parse_args()
-
-    title = Text("\n🌦️  Weather CLI Tool v2.0  🍃", style="bold magenta")
-    console.print(title)
 
     if args.command == "weather":
         show_weather(" ".join(args.city))
     elif args.command == "air":
         show_air_quality(" ".join(args.city))
-    else:
-        # Default behavior or Interactive Menu
-        if len(sys.argv) > 1:
-             # Fallback for old usage `python main.py London`
-             show_weather(" ".join(sys.argv[1:]))
-        else:
-            # Interactive Mode if no args
-            console.print("[yellow]No command specified. Entering interactive mode...[/yellow]")
-            city = Prompt.ask("[cyan]Enter city name[/cyan]")
-            mode = Prompt.ask("[cyan]Choose mode[/cyan]", choices=["weather", "air"], default="weather")
-            
-            if mode == "weather":
-                show_weather(city)
-            else:
-                show_air_quality(city)
 
 if __name__ == "__main__":
     main()
